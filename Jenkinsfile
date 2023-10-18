@@ -10,13 +10,23 @@ pipeline {
         DOCKER_HUB_REPO = 'mohamedbouarada/springbootapp'
         IMAGE_TAG = 'latest'
     }
-
+    tools {
+        // Specify the name of the Maven installation you configured in Jenkins
+        maven 'Maven'
+    }
     stages {
         stage('Clone repository') {
             steps {
                 script {
                     checkout([$class: 'GitSCM'])
                 }
+            }
+        }
+
+        stage('Build and Package') {
+            steps {
+                // Build the application (e.g., using Maven)
+                sh 'mvn clean package'
             }
         }
 
