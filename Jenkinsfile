@@ -13,6 +13,17 @@ pipeline {
     }
 
     stages {
+        stage('Docker Login') {
+            steps {
+                script {
+                    // Authenticate with Docker Hub using your credentials
+                    withDockerRegistry([credentialsId: 'dockerhub_id']) {
+                        // This stage will log in to Docker Hub
+                        sh 'docker login -u <your-dockerhub-username> -p <your-dockerhub-password>'
+                    }
+                }
+            }
+        }
         stage('Checkout from GitHub') {
             steps {
                 checkout scm
