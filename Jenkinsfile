@@ -29,10 +29,14 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-        stage("Docker Login"){
-                sh 'docker --version'
-                withCredentials([string(credentialsId: 'dockerhub_id', variable: 'PASSWORD')]) {
-                    sh 'docker login -u mohamedbouarada -p $PASSWORD'
+        stage('Docker Login') {
+                steps {
+                script {
+                        sh 'docker --version'
+                    withCredentials([string(credentialsId: 'dockerhub_id', variable: 'PASSWORD')]) {
+                        sh 'docker login -u mohamedbouarada -p $PASSWORD'
+                    }
+                }
                 }
         }
         stage('Build Docker Image') {
@@ -51,7 +55,7 @@ pipeline {
                     // Log in to Docker Hub (you need Docker Hub credentials)
                     withCredentials([usernamePassword(credentialsId: 'dockerhub_id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                         withDockerRegistry([url: 'https://index.docker.io/v1/']) {
-                            sh "docker logout"
+                            sh 'docker logout'
                             sh 'echo $dockerHubPassword | docker login -u $dockerHubUser --password-stdin'
                             sh "docker push ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG}"
                         }
@@ -60,5 +64,4 @@ pipeline {
             }
         }
     }
-    
 }
