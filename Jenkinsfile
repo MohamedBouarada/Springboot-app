@@ -1,67 +1,41 @@
-node {
-    git credentialsId: 'github-creds',
-        url: 'https://github.com/MohamedBouarada/Springboot-app', branch: 'master'
-}
-
 pipeline {
     agent any
+
     environment {
-        REPOSITORY_URL = 'https://github.com/MohamedBouarada/Springboot-app'
-        DOCKER_HUB_REPO = 'mohamedbouarada/springbootapp'
-        IMAGE_TAG = 'latest'
-    }
+        registry = "mohamedbouarada/newspringbootapp"
+        registryCredential = 'dockerhub_id'
+        dockerImage = ''
+    }      
     tools {
         // Specify the name of the Maven installation you configured in Jenkins
         maven 'Maven'
     }
     stages {
-        stage('Clone repository') {
+        stage('Checkout from GitHub') {
             steps {
-                script {
-                    checkout([$class: 'GitSCM'])
-                }
+                // Checkout the source code from GitHub
+                checkout scm
             }
         }
-
         stage('Build and Package') {
             steps {
                 // Build the application (e.g., using Maven)
                 sh 'mvn clean package'
             }
         }
-        stage('Docker Login') {
-                steps {
-                script {
-                        sh 'docker --version'
-                    withCredentials([string(credentialsId: 'dockerhub_id', variable: 'PASSWORD')]) {
-                        sh 'docker login -u mohamedbouarada -p $PASSWORD'
-                    }
-                }
-                }
-        }
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                        sh 'docker version'
-                        // Build the Docker image
-                        sh "docker build -t ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG} ."
-                }
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                script {
-                    // Log in to Docker Hub (you need Docker Hub credentials)
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub_id', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
-                        withDockerRegistry([url: 'https://index.docker.io/v1/']) {
-                            sh 'docker logout'
-                            sh 'echo $dockerHubPassword | docker login -u $dockerHubUser --password-stdin'
-                            sh "docker push ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG}"
-                        }
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
+}
                     }
                 }
             }
+        stage('Cleaning up') {
+            steps{
+            sh "docker rmi $registry:$BUILD_NUMBER"
+        }
         }
     }
 }
