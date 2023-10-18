@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     environment {
-        registry = "mohamedbouarada/newspringbootapp"
-    }      
+        registry = 'mohamedbouarada/newspringbootapp'
+        registryCredential = 'dockerhub_id'
+        dockerImage = ''
+    }
     tools {
         // Specify the name of the Maven installation you configured in Jenkins
         maven 'Maven'
@@ -23,18 +25,22 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker Image') {
+        stage('Building our image') {
             steps {
                 script {
-                    // Build a Docker image and push it to Docker Hub
-                    docker.build(registry, "--build-arg JAR_FILE=target/*.jar")
-                    docker.withRegistry('', credentialsId: 'dockerhub_id') {
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER"
+                }
+            }
+        }
+        stage('Deploy our image') {
+            steps {
+                script {
+                    docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
                 }
             }
         }
-
         stage('Cleaning up') {
             steps {
                 sh "docker rmi $registry:$BUILD_NUMBER"
