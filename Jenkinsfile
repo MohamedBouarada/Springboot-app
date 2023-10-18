@@ -4,7 +4,10 @@ pipeline {
     environment {
         DOCKERHUB_CREDENTIALS = credentials('dockerhub_id')
     }
-
+    tools {
+        // Specify the name of the Maven installation you configured in Jenkins
+        maven 'Maven'
+    }
     stages {
         stage('Checkout from GitHub') {
             steps {
