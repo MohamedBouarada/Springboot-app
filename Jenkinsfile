@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -26,6 +27,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
+                    h "docker build -t mohamedbouarada/newspringbootapp:latest ."
                     docker.withRegistry( '', registryCredential ) {
                         dockerImage.push()
 }
