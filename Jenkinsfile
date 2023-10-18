@@ -29,10 +29,16 @@ pipeline {
                 sh 'mvn clean package'
             }
         }
-
+        stage("Docker Login"){
+                sh 'docker --version'
+                withCredentials([string(credentialsId: 'dockerhub_id', variable: 'PASSWORD')]) {
+                    sh 'docker login -u mohamedbouarada -p $PASSWORD'
+                }
+        }
         stage('Build Docker Image') {
             steps {
                 script {
+                        sh 'docker version'
                         // Build the Docker image
                         sh "docker build -t ${env.DOCKER_HUB_REPO}:${env.IMAGE_TAG} ."
                 }
