@@ -27,7 +27,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    h "docker build -t mohamedbouarada/newspringbootapp:latest ."
+                    sh "docker build -t mohamedbouarada/newspringbootapp:latest ."
                     docker.withRegistry( '', registryCredential ) {
                         dockerImage.push()
 }
