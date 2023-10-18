@@ -1,26 +1,33 @@
 pipeline {
     agent any
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub_id')
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout from GitHub') {
             steps {
-                // Récupérer le code source depuis GitHub
+                // Checkout the source code from GitHub
                 checkout scm
             }
         }
-        stage('Build Docker Image') {
+        stage('Build and Package') {
             steps {
-                // Construire l'image Docker
-                script {
-                    docker.build("scrape-master:latest")
-                }
+                // Build the application (e.g., using Maven)
+                sh 'mvn clean package'
             }
         }
-        stage('Push to DockerHub') {
+        stage('Build and Push Docker Image') {
             steps {
-                // Poussez l'image Docker vers DockerHub
                 script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                        docker.image("scrape-master:latest").push()
+                    // Authenticate with Docker Hub using credentials
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'DOCKERHUB_CREDENTIALS', usernameVariable: 'DOCKERHUB_USERNAME', passwordVariable: 'DOCKERHUB_PASSWORD']]) {
+                        // Build a Docker image
+                        def dockerImage = docker.build("mohamedbouarada/newspringbootapp:${env.BUILD_ID}")
+
+                        // Push the Docker image to Docker Hub
+                        dockerImage.push()
                     }
                 }
             }
