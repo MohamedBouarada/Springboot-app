@@ -1,0 +1,14 @@
+version: "3"
+services:
+  mongodb-container:
+    image: mongo:latest
+    container_name: "mongodb-container"
+    ports:
+      - 27017:27017
+  newapp:
+    image: newapp
+    container_name: newapp
+    ports:
+      - 8090:8081
+    links:
+      - mongodb-container
