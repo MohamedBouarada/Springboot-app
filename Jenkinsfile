@@ -1,9 +1,5 @@
 pipeline {
-    agent {
-        node{
-            label 'docker-agent-alpine'
-        }
-    }
+    agent any
 
     environment {
         registry = "mohamedbouarada/newspringbootapp"
@@ -17,17 +13,6 @@ pipeline {
     }
 
     stages {
-        stage('Docker Login') {
-            steps {
-                script {
-                    // Authenticate with Docker Hub using your credentials
-                    withDockerRegistry([credentialsId: 'dockerhub_id']) {
-                        // This stage will log in to Docker Hub
-                        sh 'docker login -u <your-dockerhub-username> -p <your-dockerhub-password>'
-                    }
-                }
-            }
-        }
         stage('Checkout from GitHub') {
             steps {
                 checkout scm
@@ -43,7 +28,7 @@ pipeline {
         stage('Build and Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('', 'dockerhub_id') {
+                    docker.withRegistry('', 'dockerhub') {
                         // Add the BUILD_NUMBER to the image tag
                         def customImage = docker.build("${registry}:${env.BUILD_NUMBER}", "--build-arg JAR_FILE=target/*.jar")
                         customImage.push()
