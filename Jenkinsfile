@@ -30,7 +30,7 @@ pipeline {
                 script {
                     docker.withRegistry('', 'dockerhub') {
                         // Add the BUILD_NUMBER to the image tag
-                        def customImage = docker.build("${registry}:${env.BUILD_NUMBER}", "--build-arg JAR_FILE=target/*.jar")
+                        def customImage = docker.build("${registry}:${env.BUILD_NUMBER}")
                         customImage.push()
                     }
                 }
