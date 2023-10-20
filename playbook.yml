@@ -1,0 +1,23 @@
+- name: Deploy maven project on localhost for testing
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+      become: true
+
+    - name: Pull the project Image
+      community.docker.docker_image:
+        name: mohamedbouarada/newspringbootapp
+        source: pull
+
+    - name: Create the project container
+      community.docker.docker_container:
+        name: springbootprojectcontainer
+        image: malekghorbel/newspringbootapp
+        ports:
+          - "8085:8085"
+        state: present
