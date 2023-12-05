@@ -17,7 +17,7 @@
     - name: Create the project container
       community.docker.docker_container:
         name: springbootprojectcontainer
-        image: malekghorbel/newspringbootapp
+        image: mohamedbouarada/newspringbootapp
         ports:
           - "8085:8085"
         state: present
